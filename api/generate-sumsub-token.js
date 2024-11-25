@@ -41,7 +41,7 @@ const handler = async (req, res) => {
     const urlPath = '/resources/accessTokens';
 
     // Build the query parameters
-    const queryParams = `userId=${encodeURIComponent(userId)}&levelName=mtc`;
+    const queryParams = `userId=${encodeURIComponent(userId)}&levelName=MTC FTU`;
     const fullUrl = `${sumsubApiUrl}?${queryParams}`;
 
     // Prepare the body
