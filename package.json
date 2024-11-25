@@ -1,7 +1,7 @@
 {
   "name": "masstransitcompany",
   "version": "1.0.0",
-  "description": "Sign-in and Verification with Firebase and SumSub, and Fleet Management Webapp",
+  "description": "Sign-in and Verification with Firebase and SumSub, plus Fleet Management Webapp",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --mode development --open",
@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "axios": "^1.4.0",
+    "firebase": "^9.23.0",
     "micro-cors": "^0.1.1",
-    "@sumsub/websdk": "^1.0.0",
-    "firebase": "^9.6.1" // Ensure Firebase is included if used
+    "@sumsub/websdk": "^1.0.0" // Ensure this version matches the latest available
   },
   "devDependencies": {
     "webpack": "^5.88.2",
