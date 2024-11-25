@@ -20,7 +20,7 @@
       "dest": "/public/sign-in.html"
     },
     {
-      "src": "/sign-in/(.*)",
+      "src": "/sign-in.html",
       "dest": "/public/sign-in.html"
     },
     {
