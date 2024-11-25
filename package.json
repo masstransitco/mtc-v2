@@ -2,7 +2,7 @@
   "name": "masstransitcompany",
   "version": "1.0.0",
   "description": "Sign-in and Verification with Firebase and SumSub, plus Fleet Management Webapp",
-  "main": "index.js",
+  "main": "signin.js",
   "scripts": {
     "start": "webpack serve --mode development --open",
     "build": "webpack --mode production"
