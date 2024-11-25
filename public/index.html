@@ -550,10 +550,11 @@
   <!-- Sketchfab Viewer API -->
   <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.0.0.js"></script>
 
-  <!-- Firebase App (the core Firebase SDK) -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-  <!-- Firebase Auth SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+<!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<!-- Firebase Auth SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+
 
 </head>
 <body>
@@ -694,7 +695,7 @@
     let currentMarkerType = 'Cars'; // Default state
 
     // Initialize Google Map with custom styles and services
-    function initMap() {
+    window.initMap = function() {
       geocoder = new google.maps.Geocoder();
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer({
