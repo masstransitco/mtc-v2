@@ -41,24 +41,19 @@
   <!-- Firebase Compatibility Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-  <!-- SumSub Web SDK -->
-  <!-- Use the specific version URL or include locally if necessary -->
-  <script src="https://static.sumsub.com/sdk/web/1.7.0/dist/js/sumsub-websdk.production.min.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Sign-in & Verification</h1>
     <button id="google-signin">Continue with Google</button>
     <button id="email-signin">Continue with Email</button>
-    <div id="sumsub-websdk-container" style="margin-top: 20px;"></div>
   </div>
 
   <!-- Main JavaScript for Sign-in -->
   <script>
     // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyAj46uOcP-Y4T3X2ZpdlWt4_PxUWCTFwyM",
+     apiKey: "AIzaSyAj46uOcP-Y4T3X2ZpdlWt4_PxUWCTFwyM",
       authDomain: "masstransitcompany.firebaseapp.com",
       projectId: "masstransitcompany",
       storageBucket: "masstransitcompany.appspot.com",
@@ -71,12 +66,9 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Debugging log for snsWebSdk
-    console.log('snsWebSdk at script start:', typeof window.snsWebSdk);
-
     // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
-      console.log('Google Sign-In button clicked'); // Debugging Log
+      console.log('Google Sign-In button clicked');
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
         .then(result => {
@@ -92,39 +84,16 @@
 
     // Email Sign-In (Placeholder)
     document.getElementById('email-signin').addEventListener('click', () => {
-      console.log('Email Sign-In button clicked'); // Debugging Log
+      console.log('Email Sign-In button clicked');
       alert('Email Sign-In is not implemented yet.');
     });
 
     // SumSub Verification Functions
     function startSumsubVerification(userId) {
-    console.log('Starting SumSub verification for user:', userId);
+      console.log('Starting SumSub verification for user:', userId);
 
-    // Fetch external link from backend
-    fetch('/api/generate-sumsub-link', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userId })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.link) {
-        // Redirect the user to the external link
-        window.location.href = data.link;
-      } else {
-        throw new Error('External link not received');
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching SumSub external link:', error);
-      alert('Failed to initiate verification. Please try again later.');
-    });
-  }
-
-      // Fetch access token from backend
-      fetch('/api/generate-sumsub-token', {
+      // Fetch external link from backend
+      fetch('/api/generate-sumsub-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -133,70 +102,23 @@
       })
       .then(response => response.json())
       .then(data => {
-        if (data.accessToken) {
-          initializeSumSubSDK(data.accessToken);
+        if (data.link) {
+          // Redirect the user to the external link
+          window.location.href = data.link;
         } else {
-          throw new Error('Access token not received');
+          throw new Error('External link not received');
         }
       })
       .catch(error => {
-        console.error('Error fetching SumSub access token:', error);
+        console.error('Error fetching SumSub external link:', error);
         alert('Failed to initiate verification. Please try again later.');
       });
     }
 
-    function initializeSumSubSDK(accessToken) {
-      console.log('snsWebSdk inside initializeSumSubSDK:', typeof window.snsWebSdk);
-
-      if (typeof window.snsWebSdk === 'undefined') {
-        console.error('SumSub SDK is not loaded');
-        alert('Verification SDK failed to load. Please try again later.');
-        return;
-      }
-
-      console.log('Launching SumSub SDK');
-      window.snsWebSdk
-        .init(accessToken, () => fetchNewAccessToken())
-        .withConf({
-          lang: 'en',
-        })
-        .on('onError', (error) => {
-          console.log('SumSub onError:', error);
-          alert('Verification encountered an error. Please try again.');
-        })
-        .onMessage((type, payload) => {
-          console.log('SumSub onMessage:', type, payload);
-          if (type === 'onSdkExit') {
-            alert('Verification exited. You can retry if needed.');
-          }
-          if (type === 'onVerificationCompleted') {
-            // Redirect to Fleet Management Dashboard or another page
-            window.location.href = '/fleet';
-          }
-        })
-        .build()
-        .launch('#sumsub-websdk-container');
-    }
-
-    function fetchNewAccessToken() {
-      // Implement token refresh logic if SumSub requires it
-      return fetch('/api/generate-sumsub-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userId: 'YOUR_USER_ID' }) // Replace with actual user ID
-      })
-      .then(response => response.json())
-      .then(data => data.accessToken);
-    }
-
-    // Optional: Listen for messages from SumSub
+    // Optional: Listen for messages from SumSub (if using postMessage API)
     window.addEventListener('message', (event) => {
-      if (event.data.type === 'verificationCompleted') {
-        console.log('Verification completed for user:', event.data.userId);
-        window.location.href = '/fleet';
-      }
+      // Handle messages from SumSub if necessary
+      console.log('Received message:', event.data);
     });
   </script>
 </body>
