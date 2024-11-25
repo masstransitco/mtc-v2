@@ -1,6 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"
+<head>// Google Sign-In using Redirect
+document.getElementById('google-signin').addEventListener('click', () => {
+  console.log('Google Sign-In button clicked'); // Log button click
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithRedirect(provider)
+    .then(() => {
+      console.log('Redirecting to Google sign-in...');
+    })
+    .catch(error => {
+      console.error('Google sign-in error:', error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        alert('Sign-in was cancelled.');
+      } else {
+        alert('Google sign-in failed. Please try again.');
+      }
+    });
+});
+
+// Handle Redirect Result
+auth.getRedirectResult()
+  .then(result => {
+    if (result.credential) {
+      console.log('Google sign-in successful:', result.user);
+      // Proceed with SumSub Verification or redirect
+      startSumsubVerification(result.user.uid);
+    } else {
+      console.log('No credential returned from Google sign-in.');
+    }
+  })
+  .catch(error => {
+    console.error('Google sign-in error after redirect:', error);
+    if (error.code === 'auth/popup-closed-by-user') {
+      alert('Sign-in was cancelled.');
+    } else {
+      alert('Google sign-in failed. Please try again.');
+    }
+  });
+
   <meta charset="UTF-8">
   <title>Sign-in & Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
