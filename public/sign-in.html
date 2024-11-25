@@ -5,6 +5,7 @@
   <title>Sign-in & Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* CSS styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #121212;
@@ -35,6 +36,12 @@
     button:hover {
       background-color: #1a54c8;
     }
+
+    #verification-status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #00FF00;
+    }
   </style>
 
   <!-- Firebase Compatibility Scripts -->
@@ -45,10 +52,13 @@
   <div class="container">
     <h1>Sign-in & Verification</h1>
     <button id="google-signin">Continue with Google</button>
+    <!-- Email sign-in button removed -->
     <div id="verification-status"></div>
   </div>
 
+  <!-- Main JavaScript for Sign-in -->
   <script>
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAj46uOcP-Y4T3X2ZpdlWt4_PxUWCTFwyM",
       authDomain: "masstransitcompany.firebaseapp.com",
@@ -59,9 +69,11 @@
       measurementId: "G-NMMQLPBJD1"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
+    // Array of SumSub permalinks
     const sumsubLinks = [
       "https://in.sumsub.com/websdk/p/X9LKT3SJj4AQrQgd",
       "https://in.sumsub.com/websdk/p/l3TMudTR1avP84o0",
@@ -90,35 +102,58 @@
       "https://in.sumsub.com/websdk/p/sKg085wvVnf72Ld9"
     ];
 
-    let currentLinkIndex = 0;
-
-    function getNextSumsubLink() {
-      if (currentLinkIndex >= sumsubLinks.length) {
-        alert('All links have been used.');
-        return null;
-      }
-      return sumsubLinks[currentLinkIndex++];
+    // Function to get the current link index from localStorage
+    function getCurrentLinkIndex() {
+      const index = localStorage.getItem('sumsubLinkIndex');
+      return index ? parseInt(index, 10) : 0;
     }
 
+    // Function to set the current link index in localStorage
+    function setCurrentLinkIndex(index) {
+      localStorage.setItem('sumsubLinkIndex', index);
+    }
+
+    // Function to get the next SumSub link
+    function getNextSumsubLink() {
+      let currentIndex = getCurrentLinkIndex();
+      if (currentIndex >= sumsubLinks.length) {
+        return null; // No more links available
+      }
+      const nextLink = sumsubLinks[currentIndex];
+      setCurrentLinkIndex(currentIndex + 1);
+      return nextLink;
+    }
+
+    // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
+      console.log('Google Sign-In button clicked');
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
-        .then((result) => {
+        .then(result => {
           console.log('Google sign-in successful:', result.user);
-
-          // Get the next SumSub link
-          const nextLink = getNextSumsubLink();
-          if (nextLink) {
-            console.log('Redirecting to SumSub link:', nextLink);
-            document.getElementById('verification-status').textContent = `Verification link used: ${nextLink}`;
-            window.location.href = nextLink;
-          }
+          // Proceed with SumSub Verification using the next link
+          startSumsubVerification();
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Google sign-in error:', error);
           alert('Google sign-in failed. Please try again.');
         });
     });
+
+    // SumSub Verification Function
+    function startSumsubVerification() {
+      console.log('Starting SumSub verification');
+
+      const nextLink = getNextSumsubLink();
+      if (nextLink) {
+        console.log('Redirecting to SumSub link:', nextLink);
+        document.getElementById('verification-status').textContent = `Verification link used: ${nextLink}`;
+        window.location.href = nextLink;
+      } else {
+        console.error('No more SumSub links available.');
+        alert('Verification is currently unavailable. Please try again later.');
+      }
+    }
   </script>
 </body>
 </html>
