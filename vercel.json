@@ -16,20 +16,16 @@
       "dest": "/api/$1.js"
     },
     {
-      "src": "/fleet-management",
-      "dest": "/public/fleet-management.html"
+      "src": "/fleet",
+      "dest": "/public/fleet.html"
     },
     {
-      "src": "/user-account",
-      "dest": "/public/user-account.html"
-    },
-    {
-      "src": "/sign-in-verification",
-      "dest": "/public/sign-in-verification.html"
+      "src": "/fleet/(.*)",
+      "dest": "/public/fleet.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/public/index.html"
     }
   ]
 }
