@@ -1,10 +1,10 @@
 const Cors = require('micro-cors');
 const axios = require('axios');
-const crypto = require('crypto'); // Import the crypto module
+const crypto = require('crypto');
 
 const cors = Cors({
   allowMethods: ['POST', 'OPTIONS'],
-  origin: 'https://mtc-v2.vercel.app/', // Replace with your actual frontend domain
+  origin: 'https://www.masstransit.company', // Replace with your actual frontend domain
 });
 
 const handler = async (req, res) => {
@@ -37,15 +37,19 @@ const handler = async (req, res) => {
 
     // Prepare the request
     const ts = Math.floor(Date.now() / 1000); // Current timestamp in seconds
-    const httpMethod = 'post';
+    const httpMethod = 'POST';
     const urlPath = '/resources/accessTokens';
 
     // Build the query parameters
-    const params = `userId=${encodeURIComponent(userId)}&levelName=mtc`;
-    const fullUrl = `${sumsubApiUrl}?${params}`;
+    const queryParams = `userId=${encodeURIComponent(userId)}&levelName=mtc`;
+    const fullUrl = `${sumsubApiUrl}?${queryParams}`;
+
+    // Prepare the body
+    const requestBody = {}; // Empty object as per SumSub's requirement
+    const bodyString = JSON.stringify(requestBody);
 
     // Prepare the signature string
-    const signatureString = ts + httpMethod.toUpperCase() + urlPath + '?' + params;
+    const signatureString = ts + httpMethod + urlPath + '?' + queryParams + bodyString;
 
     // Calculate HMAC signature
     const hmac = crypto.createHmac('sha256', sumsubApiSecret);
@@ -61,7 +65,7 @@ const handler = async (req, res) => {
     };
 
     // Make the request to SumSub
-    const response = await axios.post(fullUrl, {}, { headers });
+    const response = await axios.post(fullUrl, requestBody, { headers });
 
     const { token } = response.data;
 
