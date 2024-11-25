@@ -5,7 +5,6 @@
   <title>Sign-in & Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* CSS styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #121212;
@@ -46,12 +45,10 @@
   <div class="container">
     <h1>Sign-in & Verification</h1>
     <button id="google-signin">Continue with Google</button>
-    <!-- Email sign-in button removed -->
+    <div id="verification-status"></div>
   </div>
 
-  <!-- Main JavaScript for Sign-in -->
   <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAj46uOcP-Y4T3X2ZpdlWt4_PxUWCTFwyM",
       authDomain: "masstransitcompany.firebaseapp.com",
@@ -62,75 +59,66 @@
       measurementId: "G-NMMQLPBJD1"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Array of SumSub permalinks
-    const sumsubPermalinks = [
-      'https://in.sumsub.com/websdk/p/FZKzkIvIOzjAkcBk',
-      'https://in.sumsub.com/websdk/p/IJ7fidqEdYiAIsZ5',
-      'https://in.sumsub.com/websdk/p/HFSWfVs7FEoWge6K',
-      'https://in.sumsub.com/websdk/p/7BQagyVEfZx1A4eV',
-      'https://in.sumsub.com/websdk/p/QpKirtgJn9PfmuDK',
-      'https://in.sumsub.com/websdk/p/O70I5aMSLlWSFpfb',
-      'https://in.sumsub.com/websdk/p/Kfd4UHcMkW1zibZK',
-      'https://in.sumsub.com/websdk/p/F6hXj3Y39mwyADnh',
-      'https://in.sumsub.com/websdk/p/WXjYxSi4I0vKQ6J5',
-      'https://in.sumsub.com/websdk/p/bg8NqQmAE1P0BUvb'
+    const sumsubLinks = [
+      "https://in.sumsub.com/websdk/p/X9LKT3SJj4AQrQgd",
+      "https://in.sumsub.com/websdk/p/l3TMudTR1avP84o0",
+      "https://in.sumsub.com/websdk/p/OF9QfJVMqQzWeo7B",
+      "https://in.sumsub.com/websdk/p/RZZOETU9fAF2jaDP",
+      "https://in.sumsub.com/websdk/p/4lmHJiWI8aEWrVyo",
+      "https://in.sumsub.com/websdk/p/M7bI2nd1q7QLfYXQ",
+      "https://in.sumsub.com/websdk/p/ftWbL1iJa7bbNqdT",
+      "https://in.sumsub.com/websdk/p/rNNZ0kP5LRz0xuqG",
+      "https://in.sumsub.com/websdk/p/9ytEpesDmI41Ti6X",
+      "https://in.sumsub.com/websdk/p/BnleRt3GgmUaxKzH",
+      "https://in.sumsub.com/websdk/p/Ye936reo9zJcqpf2",
+      "https://in.sumsub.com/websdk/p/neKArCZIqj7peEfZ",
+      "https://in.sumsub.com/websdk/p/6zGmlFO5RBfOVS30",
+      "https://in.sumsub.com/websdk/p/NpeH4JeLRW3wTubI",
+      "https://in.sumsub.com/websdk/p/l2tKDND1QlxDPB2Y",
+      "https://in.sumsub.com/websdk/p/EMpDvwO3Dg64r7fo",
+      "https://in.sumsub.com/websdk/p/CjPGbukpaj5Imqkd",
+      "https://in.sumsub.com/websdk/p/V2KYqzt6CDdLAF2V",
+      "https://in.sumsub.com/websdk/p/8mdDZ4i8QwCARYL6",
+      "https://in.sumsub.com/websdk/p/2jwFi8ALzuBtmzfY",
+      "https://in.sumsub.com/websdk/p/taiTUSYXW0a36lHh",
+      "https://in.sumsub.com/websdk/p/27DlYMH4n2FH1vvh",
+      "https://in.sumsub.com/websdk/p/uH2W80toR9nJF35E",
+      "https://in.sumsub.com/websdk/p/r2urvgRwV8uGZBp6",
+      "https://in.sumsub.com/websdk/p/sKg085wvVnf72Ld9"
     ];
 
-    // Function to get the next unused permalink
-    function getNextPermalink() {
-      // Get the current index from localStorage or start at 0
-      let currentIndex = parseInt(localStorage.getItem('sumsubPermalinkIndex')) || 0;
+    let currentLinkIndex = 0;
 
-      // Check if we've exhausted all permalinks
-      if (currentIndex >= sumsubPermalinks.length) {
-        alert('No more verification links are available. Please contact support.');
+    function getNextSumsubLink() {
+      if (currentLinkIndex >= sumsubLinks.length) {
+        alert('All links have been used.');
         return null;
       }
-
-      // Get the next permalink
-      const nextPermalink = sumsubPermalinks[currentIndex];
-
-      // Increment and store the updated index
-      currentIndex++;
-      localStorage.setItem('sumsubPermalinkIndex', currentIndex);
-
-      return nextPermalink;
+      return sumsubLinks[currentLinkIndex++];
     }
 
-    // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
-      console.log('Google Sign-In button clicked');
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
-        .then(result => {
+        .then((result) => {
           console.log('Google sign-in successful:', result.user);
-          // Proceed with SumSub Verification using the next permalink
-          startSumsubVerification();
+
+          // Get the next SumSub link
+          const nextLink = getNextSumsubLink();
+          if (nextLink) {
+            console.log('Redirecting to SumSub link:', nextLink);
+            document.getElementById('verification-status').textContent = `Verification link used: ${nextLink}`;
+            window.location.href = nextLink;
+          }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Google sign-in error:', error);
           alert('Google sign-in failed. Please try again.');
         });
     });
-
-    // SumSub Verification Function
-    function startSumsubVerification() {
-      console.log('Starting SumSub verification');
-
-      // Get the next available permalink
-      const permalink = getNextPermalink();
-
-      if (permalink) {
-        // Redirect the user to the permalink
-        window.location.href = permalink;
-      } else {
-        console.error('No available SumSub permalinks');
-      }
-    }
   </script>
 </body>
 </html>
