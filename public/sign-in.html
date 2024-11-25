@@ -5,7 +5,7 @@
   <title>Sign-in & Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Add your CSS styles here or link to an external stylesheet */
+    /* CSS styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #121212;
@@ -43,8 +43,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <!-- SumSub Web SDK -->
-<script src="https://in.sumsub.com/websdk/p/NZFXbELMLv9MmNp8"></script>
-
+  <!-- Use the specific version URL or include locally if necessary -->
+  <script src="https://static.sumsub.com/sdk/web/1.7.0/dist/js/sumsub-websdk.production.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -53,9 +53,6 @@
     <button id="email-signin">Continue with Email</button>
     <div id="sumsub-websdk-container" style="margin-top: 20px;"></div>
   </div>
-
-  <!-- Include the html5-qrcode library if needed -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Main JavaScript for Sign-in -->
   <script>
@@ -74,11 +71,8 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    
     // Debugging log for snsWebSdk
-    console.log('snsWebSdk at script start:', typeof snsWebSdk);
-
-    
+    console.log('snsWebSdk at script start:', typeof window.snsWebSdk);
 
     // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
@@ -87,7 +81,7 @@
       auth.signInWithPopup(provider)
         .then(result => {
           console.log('Google sign-in successful:', result.user);
-          // Proceed with SumSub Verification or redirect
+          // Proceed with SumSub Verification
           startSumsubVerification(result.user.uid);
         })
         .catch(error => {
@@ -99,7 +93,6 @@
     // Email Sign-In (Placeholder)
     document.getElementById('email-signin').addEventListener('click', () => {
       console.log('Email Sign-In button clicked'); // Debugging Log
-      // Implement Email Sign-In functionality here
       alert('Email Sign-In is not implemented yet.');
     });
 
@@ -129,48 +122,53 @@
       });
     }
 
-    // Rest of your JavaScript code
     function initializeSumSubSDK(accessToken) {
-      console.log('snsWebSdk inside initializeSumSubSDK:', typeof snsWebSdk);
+      console.log('snsWebSdk inside initializeSumSubSDK:', typeof window.snsWebSdk);
 
-      if (typeof snsWebSdk === 'undefined') {
+      if (typeof window.snsWebSdk === 'undefined') {
         console.error('SumSub SDK is not loaded');
         alert('Verification SDK failed to load. Please try again later.');
         return;
       }
 
       console.log('Launching SumSub SDK');
-      snsWebSdk.init(
-        accessToken,
-        () => fetchNewAccessToken() // Token update callback
-      )
-      .withConf({
-        lang: 'en',
-      })
-      .on('onError', (error) => {
-        console.log('SumSub onError:', error);
-        alert('Verification encountered an error. Please try again.');
-      })
-      .onMessage((type, payload) => {
-        console.log('SumSub onMessage:', type, payload);
-        if (type === 'onSdkExit') {
-          alert('Verification exited. You can retry if needed.');
-        }
-        if (type === 'onVerificationCompleted') {
-          // Redirect to Fleet Management Dashboard or another page
-          window.location.href = '/fleet';
-        }
-      })
-      .build()
-      .launch('#sumsub-websdk-container');
+      window.snsWebSdk
+        .init(accessToken, () => fetchNewAccessToken())
+        .withConf({
+          lang: 'en',
+        })
+        .on('onError', (error) => {
+          console.log('SumSub onError:', error);
+          alert('Verification encountered an error. Please try again.');
+        })
+        .onMessage((type, payload) => {
+          console.log('SumSub onMessage:', type, payload);
+          if (type === 'onSdkExit') {
+            alert('Verification exited. You can retry if needed.');
+          }
+          if (type === 'onVerificationCompleted') {
+            // Redirect to Fleet Management Dashboard or another page
+            window.location.href = '/fleet';
+          }
+        })
+        .build()
+        .launch('#sumsub-websdk-container');
     }
 
     function fetchNewAccessToken() {
       // Implement token refresh logic if SumSub requires it
-      return Promise.resolve('YOUR_NEW_ACCESS_TOKEN'); // Replace with actual logic
+      return fetch('/api/generate-sumsub-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: 'YOUR_USER_ID' }) // Replace with actual user ID
+      })
+      .then(response => response.json())
+      .then(data => data.accessToken);
     }
 
-    // Listen for messages from SumSub (optional)
+    // Optional: Listen for messages from SumSub
     window.addEventListener('message', (event) => {
       if (event.data.type === 'verificationCompleted') {
         console.log('Verification completed for user:', event.data.userId);
@@ -180,4 +178,3 @@
   </script>
 </body>
 </html>
-
