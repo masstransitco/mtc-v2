@@ -66,6 +66,41 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
+    // Array of SumSub permalinks
+    const sumsubPermalinks = [
+      'https://in.sumsub.com/websdk/p/FZKzkIvIOzjAkcBk',
+      'https://in.sumsub.com/websdk/p/IJ7fidqEdYiAIsZ5',
+      'https://in.sumsub.com/websdk/p/HFSWfVs7FEoWge6K',
+      'https://in.sumsub.com/websdk/p/7BQagyVEfZx1A4eV',
+      'https://in.sumsub.com/websdk/p/QpKirtgJn9PfmuDK',
+      'https://in.sumsub.com/websdk/p/O70I5aMSLlWSFpfb',
+      'https://in.sumsub.com/websdk/p/Kfd4UHcMkW1zibZK',
+      'https://in.sumsub.com/websdk/p/F6hXj3Y39mwyADnh',
+      'https://in.sumsub.com/websdk/p/WXjYxSi4I0vKQ6J5',
+      'https://in.sumsub.com/websdk/p/bg8NqQmAE1P0BUvb'
+    ];
+
+    // Function to get the next unused permalink
+    function getNextPermalink() {
+      // Get the current index from localStorage or start at 0
+      let currentIndex = parseInt(localStorage.getItem('sumsubPermalinkIndex')) || 0;
+
+      // Check if we've exhausted all permalinks
+      if (currentIndex >= sumsubPermalinks.length) {
+        alert('No more verification links are available. Please contact support.');
+        return null;
+      }
+
+      // Get the next permalink
+      const nextPermalink = sumsubPermalinks[currentIndex];
+
+      // Increment and store the updated index
+      currentIndex++;
+      localStorage.setItem('sumsubPermalinkIndex', currentIndex);
+
+      return nextPermalink;
+    }
+
     // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
       console.log('Google Sign-In button clicked');
@@ -73,7 +108,7 @@
       auth.signInWithPopup(provider)
         .then(result => {
           console.log('Google sign-in successful:', result.user);
-          // Proceed with SumSub Verification using the permalink
+          // Proceed with SumSub Verification using the next permalink
           startSumsubVerification();
         })
         .catch(error => {
@@ -85,8 +120,16 @@
     // SumSub Verification Function
     function startSumsubVerification() {
       console.log('Starting SumSub verification');
-      // Redirect the user to the SumSub permalink
-      window.location.href = 'https://in.sumsub.com/websdk/p/zpyPRpeXLl0Tup87';
+
+      // Get the next available permalink
+      const permalink = getNextPermalink();
+
+      if (permalink) {
+        // Redirect the user to the permalink
+        window.location.href = permalink;
+      } else {
+        console.error('No available SumSub permalinks');
+      }
     }
   </script>
 </body>
