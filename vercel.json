@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    },
+    {
+      "src": "/fleet-management",
+      "dest": "/public/fleet-management.html"
+    },
+    {
+      "src": "/user-account",
+      "dest": "/public/user-account.html"
+    },
+    {
+      "src": "/sign-in-verification",
+      "dest": "/public/sign-in-verification.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ]
+}
