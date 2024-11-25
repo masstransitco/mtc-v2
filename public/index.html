@@ -25,7 +25,6 @@
     header {
       display: flex;
       align-items: center;
-      justify-content: center; /* Center the toggle switch */
       padding: 10px 20px;
       background-color: #1e1e1e; /* Header background */
       position: fixed;
@@ -33,6 +32,12 @@
       width: 100%;
       z-index: 1000;
       height: 60px; /* Fixed height */
+    }
+
+    .toggle-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
     }
 
     /* Toggle Switch Redesign */
@@ -75,6 +80,41 @@
 
     .toggle-button:not(.active):hover {
       background-color: #444444;
+    }
+
+    /* Google Sign-In Button */
+    #googleSignInButton {
+      background-color: #276EF1; /* Uber blue */
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    #googleSignInButton:hover {
+      opacity: 0.8;
+    }
+
+    /* User Info Styling */
+    #userInfo {
+      display: none;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    #userAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    #userName {
+      color: #fff;
+      font-size: 1rem;
     }
 
     /* Footer Styling */
@@ -392,6 +432,71 @@
       font-size: 1rem;
     }
 
+    /* Sidebar styling */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px; /* Hidden by default */
+      width: 300px;
+      height: 100%;
+      background-color: #1e1e1e;
+      color: #fff;
+      transition: right 0.3s ease;
+      z-index: 1001;
+    }
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .sidebar-content {
+      padding: 20px;
+    }
+
+    .sidebar-content .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .user-details {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .user-details img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+
+    .user-details h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .user-details p {
+      margin: 5px 0 0;
+      font-size: 1rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar-menu li {
+      padding: 15px;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .details-container {
@@ -445,14 +550,26 @@
   <!-- Sketchfab Viewer API -->
   <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.0.0.js"></script>
 
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+  <!-- Firebase Auth SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+
 </head>
 <body>
-  <!-- Header with Toggle Switch -->
+  <!-- Header with Toggle Switch and Google Sign-In -->
   <header>
     <div class="toggle-container">
       <div class="toggle-base"></div>
       <button class="toggle-button active" id="toggleCars">Cars</button>
       <button class="toggle-button" id="toggleStations">Stations</button>
+    </div>
+    <!-- New Google Sign-In Button -->
+    <button id="googleSignInButton">Continue with Google</button>
+    <!-- User Info Container (Initially Hidden) -->
+    <div id="userInfo">
+      <img id="userAvatar" src="" alt="User Avatar">
+      <span id="userName"></span>
     </div>
   </header>
 
@@ -536,16 +653,32 @@
     </div>
   </div>
 
+  <!-- Sidebar Menu -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-content">
+      <button id="closeSidebar" class="close-btn">&times;</button>
+      <div class="user-details">
+        <img id="sidebarUserAvatar" src="" alt="User Avatar">
+        <h2 id="sidebarUserName"></h2>
+        <p id="sidebarUserEmail"></p>
+      </div>
+      <ul class="sidebar-menu">
+        <li id="driverVerification">Driver Verification</li>
+        <li id="farePayments">Fare Payments</li>
+      </ul>
+    </div>
+  </div>
+
   <!-- Non-module Script for Global Functions -->
   <script>
     // Configuration
     const username = 'URBA00001'; // Replace with your username
-    const token = 'fd58cd26fefc8c2b2ba1f7f52b33221a65f645790a43ff9b8da35db7da6e1f33'; // Replace with your token
+    const token = 'YOUR_TOKEN'; // Replace with your token
     const auth = btoa(`${username}:${token}`);
     const baseUrl = 'https://fleetapi-hk.cartrack.com/rest';
 
     // Google Maps Datasets API Configuration
-    const datasetsApiKey = '880316754524-m88cmb6dla3pf3i51p3ph26ecnv49ja7.apps.googleusercontent.com'; // Replace with your Datasets API key
+    const datasetsApiKey = 'Y880316754524-m88cmb6dla3pf3i51p3ph26ecnv49ja7.apps.googleusercontent.com'; // Replace with your Datasets API key
     const datasetId = 'f5c242ae-3f30-4313-ab9a-e2df8af5b09d'; // Dataset ID
 
     let map;
@@ -638,8 +771,6 @@
       fetchStations();
 
       // Add locate button above zoom controls
-      // Removed custom locate button to prevent CORS issues
-      // Using Google's default map tools and adding a new locate button
       addLocateButton();
     }
 
@@ -1264,14 +1395,6 @@
             sketchfabViewer.setOption('ui_annotations', false);
             // Auto-start the model
             sketchfabViewer.play();
-            // Zoom into annotation "1" as starting view
-            // This requires knowing the annotation ID; assuming "1" is the ID
-            sketchfabViewer.setCameraLookAt({
-              camera: 0, // Default camera
-              target: { x: 0, y: 0, z: 0 }, // Replace with actual coordinates
-              distance: 1, // Adjust as needed
-              duration: 1 // 1 second transition
-            });
           });
         },
         error: function() {
@@ -1382,27 +1505,69 @@
       });
     }
 
-    // Sketchfab Annotations Customization
-    // This requires knowledge of the specific annotations in your Sketchfab model
-    // The following is a placeholder and may need adjustments based on your model's annotations
+    // Firebase Authentication Code
 
-    function customizeSketchfabAnnotations() {
-      if (!sketchfabViewer) {
-        console.error('Sketchfab Viewer API not initialized.');
-        return;
-      }
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAj46uOcP-Y4T3X2ZpdlWt4_PxUWCTFwyM",
+      authDomain: "masstransitcompany.firebaseapp.com",
+      projectId: "masstransitcompany",
+      storageBucket: "masstransitcompany.appspot.com",
+      messagingSenderId: "1039705984668",
+      appId: "1:1039705984668:web:e85aafd14917825b3d6759",
+      measurementId: "G-NMMQLPBJD1"
+    };
 
-      sketchfabViewer.addEventListener('annotationclick', function(event) {
-        const annotation = event.detail;
-        // Customize the annotation appearance to white illuminating squares
-        sketchfabViewer.setAnnotationIcon(annotation.id, 'https://path-to-white-square-icon.png');
-        // Toggle title display on click
-        // This requires additional implementation based on Sketchfab's API capabilities
-      });
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Global variable to store user info
+    let currentUser = null;
+
+    // Function to update UI after sign-in
+    function updateUIForSignedInUser(user) {
+      document.getElementById('googleSignInButton').style.display = 'none';
+      document.getElementById('userInfo').style.display = 'flex';
+      document.getElementById('userAvatar').src = user.photoURL;
+      document.getElementById('userName').textContent = user.displayName;
     }
 
-    // Call customizeSketchfabAnnotations after viewer is ready
-    sketchfabViewer?.addEventListener('viewerready', customizeSketchfabAnnotations);
+    // Check if user is already signed in
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        currentUser = user;
+        updateUIForSignedInUser(user);
+      }
+    });
+
+    // Event listener for Google Sign-In
+    document.getElementById('googleSignInButton').addEventListener('click', function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(function(result) {
+          currentUser = result.user;
+          updateUIForSignedInUser(currentUser);
+        })
+        .catch(function(error) {
+          console.error('Error during sign-in:', error.code, error.message);
+        });
+    });
+
+    // Event listener to show sidebar when clicking on user info
+    document.getElementById('userInfo').addEventListener('click', function() {
+      if (currentUser) {
+        document.getElementById('sidebarUserAvatar').src = currentUser.photoURL;
+        document.getElementById('sidebarUserName').textContent = currentUser.displayName;
+        document.getElementById('sidebarUserEmail').textContent = currentUser.email;
+        document.getElementById('sidebar').classList.add('active');
+      }
+    });
+
+    // Event listener to close sidebar
+    document.getElementById('closeSidebar').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.remove('active');
+    });
 
   </script>
 
