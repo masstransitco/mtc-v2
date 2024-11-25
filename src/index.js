@@ -25,8 +25,8 @@ function launchWebSdk(accessToken) {
         alert('Verification exited. You can retry if needed.');
       }
       if (type === 'onVerificationCompleted') {
-        // Redirect to User Account Page
-        window.location.href = 'user-account.html';
+        // Redirect to Fleet Management Dashboard
+        window.location.href = '/fleet';
       }
     })
     .build();
@@ -58,7 +58,7 @@ window.addEventListener('message', (event) => {
     // Handle the verification completion (e.g., update UI, notify server)
     console.log('Verification completed for user:', event.data.userId);
     // Redirect or perform other actions as needed
-    window.location.href = 'user-account.html';
+    window.location.href = '/fleet';
   }
 });
 
