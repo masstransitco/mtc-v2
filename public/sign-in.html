@@ -74,8 +74,19 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
+    
     // Debugging log for snsWebSdk
     console.log('snsWebSdk at script start:', typeof snsWebSdk);
+
+    // Rest of your JavaScript code
+    function initializeSumSubSDK(accessToken) {
+      console.log('snsWebSdk inside initializeSumSubSDK:', typeof snsWebSdk);
+
+      if (typeof snsWebSdk === 'undefined') {
+        console.error('SumSub SDK is not loaded');
+        alert('Verification SDK failed to load. Please try again later.');
+        return;
+      }
 
     // Google Sign-In
     document.getElementById('google-signin').addEventListener('click', () => {
