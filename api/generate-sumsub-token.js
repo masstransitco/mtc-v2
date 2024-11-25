@@ -4,7 +4,7 @@ const crypto = require('crypto'); // Import the crypto module
 
 const cors = Cors({
   allowMethods: ['POST', 'OPTIONS'],
-  origin: 'https://www.masstransit.company', // Replace with your actual frontend domain
+  origin: 'https://mtc-v2.vercel.app/', // Replace with your actual frontend domain
 });
 
 const handler = async (req, res) => {
