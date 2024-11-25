@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const cors = Cors({
   allowMethods: ['POST', 'OPTIONS'],
-  origin: 'https://mtc-v2.vercel.app/', // Corrected URL
+  origin: 'https://www.masstransit.company', // Replace with your actual frontend domain
 });
 
 const handler = async (req, res) => {
@@ -36,7 +36,7 @@ const handler = async (req, res) => {
     }
 
     // Prepare the request
-    const ts = Date.now(); // Current timestamp in milliseconds
+    const ts = Math.floor(Date.now() / 1000); // Current timestamp in seconds
     const httpMethod = 'POST';
     const urlPath = '/resources/accessTokens';
 
@@ -57,8 +57,8 @@ const handler = async (req, res) => {
     const fullUrl = `${sumsubApiUrl}?${sortedQueryParams}`;
 
     // Prepare the body
-    const requestBody = null; // Empty body as per SumSub's requirement
-    const bodyString = '';    // Empty string for signature
+    const requestBody = {}; // Empty object as per SumSub's requirement
+    const bodyString = JSON.stringify(requestBody);
 
     // Prepare the signature string
     const signatureString = ts + httpMethod + urlPath + '?' + sortedQueryParams + bodyString;
@@ -77,7 +77,7 @@ const handler = async (req, res) => {
     };
 
     // Make the request to SumSub
-    const response = await axios.post(fullUrl, null, { headers });
+    const response = await axios.post(fullUrl, requestBody, { headers });
 
     const { token } = response.data;
 
@@ -87,7 +87,7 @@ const handler = async (req, res) => {
       'Error generating SumSub token:',
       error.response ? error.response.data : error.message
     );
-    res.status(500).json({ error: error.response ? error.response.data : error.message });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
