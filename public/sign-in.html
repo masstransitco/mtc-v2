@@ -4,7 +4,40 @@
   <meta charset="UTF-8">
   <title>Sign-in & Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Add your CSS styles here or link to an external stylesheet */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #276EF1;
+      color: #fff;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #1a54c8;
+    }
+  </style>
+
   <!-- Firebase Compatibility Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -12,13 +45,124 @@
 <body>
   <div class="container">
     <h1>Sign-in & Verification</h1>
-    <div class="sign-in-buttons">
-      <button id="google-signin">Continue with Google</button>
-      <button id="email-signin">Continue with Email</button>
-    </div>
+    <button id="google-signin">Continue with Google</button>
+    <button id="email-signin">Continue with Email</button>
     <div id="sumsub-websdk-container" style="margin-top: 20px;"></div>
   </div>
 
+  <!-- Include the html5-qrcode library if needed -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
+  <!-- Main JavaScript for Sign-in -->
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+      projectId: "YOUR_FIREBASE_PROJECT_ID",
+      storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_FIREBASE_SENDER_ID",
+      appId: "YOUR_FIREBASE_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Google Sign-In
+    document.getElementById('google-signin').addEventListener('click', () => {
+      console.log('Google Sign-In button clicked'); // Debugging Log
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          console.log('Google sign-in successful:', result.user);
+          // Proceed with SumSub Verification or redirect
+          startSumsubVerification(result.user.uid);
+        })
+        .catch(error => {
+          console.error('Google sign-in error:', error);
+          alert('Google sign-in failed. Please try again.');
+        });
+    });
+
+    // Email Sign-In (Placeholder)
+    document.getElementById('email-signin').addEventListener('click', () => {
+      console.log('Email Sign-In button clicked'); // Debugging Log
+      // Implement Email Sign-In functionality here
+      alert('Email Sign-In is not implemented yet.');
+    });
+
+    // SumSub Verification Functions
+    function startSumsubVerification(userId) {
+      console.log('Starting SumSub verification for user:', userId);
+      
+      // Fetch access token from backend
+      fetch('/api/generate-sumsub-token', { // Ensure the backend endpoint is correct
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.accessToken) { // Adjust based on your backend response
+          initializeSumSubSDK(data.accessToken);
+        } else {
+          throw new Error('Access token not received');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching SumSub access token:', error);
+        alert('Failed to initiate verification. Please try again later.');
+      });
+    }
+
+    function initializeSumSubSDK(accessToken) {
+      if (typeof snsWebSdk === 'undefined') {
+        console.error('SumSub SDK is not loaded');
+        alert('Verification SDK failed to load. Please try again later.');
+        return;
+      }
+
+      console.log('Launching SumSub SDK');
+      snsWebSdk.init(
+        accessToken,
+        () => fetchNewAccessToken() // Token update callback
+      )
+      .withConf({
+        lang: 'en',
+      })
+      .on('onError', (error) => {
+        console.log('SumSub onError:', error);
+        alert('Verification encountered an error. Please try again.');
+      })
+      .onMessage((type, payload) => {
+        console.log('SumSub onMessage:', type, payload);
+        if (type === 'onSdkExit') {
+          alert('Verification exited. You can retry if needed.');
+        }
+        if (type === 'onVerificationCompleted') {
+          // Redirect to Fleet Management Dashboard or another page
+          window.location.href = '/fleet';
+        }
+      })
+      .build()
+      .launch('#sumsub-websdk-container');
+    }
+
+    function fetchNewAccessToken() {
+      // Implement token refresh logic if SumSub requires it
+      return Promise.resolve('YOUR_NEW_ACCESS_TOKEN'); // Replace with actual logic
+    }
+
+    // Listen for messages from SumSub (optional)
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'verificationCompleted') {
+        console.log('Verification completed for user:', event.data.userId);
+        window.location.href = '/fleet';
+      }
+    });
+  </script>
 </body>
 </html>
