@@ -41,15 +41,27 @@ const handler = async (req, res) => {
     const urlPath = '/resources/accessTokens';
 
     // Build the query parameters
-    const queryParams = `userId=${encodeURIComponent(userId)}&levelName=MTC FTU`;
-    const fullUrl = `${sumsubApiUrl}?${queryParams}`;
+    const queryParamsObj = {
+      levelName: 'MTC FTU',
+      userId: userId,
+    };
+
+    // Sort the query parameters alphabetically and encode them
+    const sortedQueryParams = Object.keys(queryParamsObj)
+      .sort()
+      .map((key) => {
+        return `${encodeURIComponent(key)}=${encodeURIComponent(queryParamsObj[key])}`;
+      })
+      .join('&');
+
+    const fullUrl = `${sumsubApiUrl}?${sortedQueryParams}`;
 
     // Prepare the body
     const requestBody = {}; // Empty object as per SumSub's requirement
     const bodyString = JSON.stringify(requestBody);
 
     // Prepare the signature string
-    const signatureString = ts + httpMethod + urlPath + '?' + queryParams + bodyString;
+    const signatureString = ts + httpMethod + urlPath + '?' + sortedQueryParams + bodyString;
 
     // Calculate HMAC signature
     const hmac = crypto.createHmac('sha256', sumsubApiSecret);
@@ -71,7 +83,10 @@ const handler = async (req, res) => {
 
     res.status(200).json({ accessToken: token });
   } catch (error) {
-    console.error('Error generating SumSub token:', error.response ? error.response.data : error.message);
+    console.error(
+      'Error generating SumSub token:',
+      error.response ? error.response.data : error.message
+    );
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
